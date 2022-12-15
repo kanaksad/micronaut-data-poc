@@ -1,0 +1,16 @@
+micronaut:
+  application:
+    name: demo
+datasources:
+  default:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    db-type: mysql
+    schema-generate: CREATE_DROP
+    dialect: MYSQL
+    url: jdbc:mysql://localhost:3306/injection_poc
+    username: root
+    password: ''
+netty:
+  default:
+    allocator:
+      max-order: 3

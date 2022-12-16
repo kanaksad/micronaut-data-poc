@@ -20,32 +20,16 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.Query;
 import io.micronaut.data.exceptions.DataAccessException;
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
-import io.micronaut.data.jdbc.runtime.JdbcOperations;
 import io.micronaut.data.model.query.builder.sql.Dialect;
-import io.micronaut.data.repository.CrudRepository;
 import io.micronaut.data.repository.PageableRepository;
 
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.sql.ResultSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @JdbcRepository(dialect = Dialect.MYSQL)
-public abstract class UserRepository implements CrudRepository<User, Long> {
-//    @Query("SELECT * FROM mn where name = :t")
-//    List<User> listUsers(String t);
-    private JdbcOperations jdbcOperations;
-    public UserRepository(JdbcOperations jdbcOperations) {
-        this.jdbcOperations = jdbcOperations;
-    }
-    @Transactional
-    List<User> listUsersTainted(String t) {
-        String sql = "SELECT * FROM mn where name=" + t;
-        return jdbcOperations.prepareStatement(sql, statement -> {
-            ResultSet resultSet = statement.executeQuery();
-            return jdbcOperations.entityStream(resultSet, User.class).collect(Collectors.toList());
-        });
-    }
+public interface UserRepository extends PageableRepository<User, Long> {
+    @Query("SELECT * FROM mn where name = :t")
+    List<User> listUsers(String t);
 }

@@ -15,6 +15,6 @@ public class Application {
     @Get("/{name}")
     public String Hello(String name) {
         UserRepository userRepository = ctx.getBean(UserRepository.class);
-        return "Should only show the url user " + name +"\n" + userRepository.listUsersTainted(name);
+        return "Should only show the url user " + name +"\n" + userRepository.listUsers(name);
     }
 }

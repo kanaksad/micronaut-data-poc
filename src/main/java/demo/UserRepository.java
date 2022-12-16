@@ -20,26 +20,32 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.Query;
 import io.micronaut.data.exceptions.DataAccessException;
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
+import io.micronaut.data.jdbc.runtime.JdbcOperations;
 import io.micronaut.data.model.query.builder.sql.Dialect;
+import io.micronaut.data.repository.CrudRepository;
 import io.micronaut.data.repository.PageableRepository;
 
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.ResultSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @JdbcRepository(dialect = Dialect.MYSQL)
-public interface UserRepository extends PageableRepository<User, Long> {
-    @Query("SELECT * FROM mn where name = :t OR 1=1")
-    List<User> listUsers(String t);
-
-    User save(@NonNull @NotBlank String name);
-
-    @Transactional
-    default User saveWithException(@NonNull @NotBlank String name) {
-        save(name);
-        throw new DataAccessException("test exception");
+public abstract class UserRepository implements CrudRepository<User, Long> {
+//    @Query("SELECT * FROM mn where name = :t")
+//    List<User> listUsers(String t);
+    private JdbcOperations jdbcOperations;
+    public UserRepository(JdbcOperations jdbcOperations) {
+        this.jdbcOperations = jdbcOperations;
     }
-
-    long update(@NonNull @NotNull @Id Long id, @NonNull @NotBlank String name);
+    @Transactional
+    List<User> listUsersTainted(String t) {
+        String sql = "SELECT * FROM mn where name=" + t;
+        return jdbcOperations.prepareStatement(sql, statement -> {
+            ResultSet resultSet = statement.executeQuery();
+            return jdbcOperations.entityStream(resultSet, User.class).collect(Collectors.toList());
+        });
+    }
 }
